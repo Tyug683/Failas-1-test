@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install Ubuntu Desktop (GNOME)
+    - name: Install XFCE4 Desktop
       run: |
         sudo apt update
-        sudo apt install -y ubuntu-desktop
+        sudo apt install -y xfce4 xfce4-goodies
 
     - name: Install XRDP
       run: |
@@ -18,13 +18,18 @@ jobs:
         sudo systemctl enable xrdp
         sudo systemctl start xrdp
 
-    - name: Configure XRDP for GNOME
+    - name: Configure XRDP for XFCE
       run: |
-        echo "gnome-session" > ~/.xsession
-        sudo sed -i 's/\/etc\/X11\/Xsession/gnome-session/g' /etc/xrdp/startwm.sh
+        echo "xfce4-session" > ~/.xsession
+        sudo sed -i 's/\/etc\/X11\/Xsession/\/usr\/bin\/xfce4-session/g' /etc/xrdp/startwm.sh
 
     - name: Set Password for Runner User
       run: echo "runner:P@ssw0rd!" | sudo chpasswd
+
+    - name: Ensure Home Directory
+      run: |
+        sudo mkdir -p /home/runner
+        sudo chown runner:runner /home/runner
 
     - name: Download Ngrok
       run: curl -s https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -o ngrok.tgz
