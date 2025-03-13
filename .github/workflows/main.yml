@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install XFCE4 Desktop
+    - name: Install Ubuntu Desktop (GNOME)
       run: |
         sudo apt update
-        sudo apt install -y xfce4 xfce4-goodies
+        sudo apt install -y ubuntu-desktop
 
     - name: Install XRDP
       run: |
@@ -18,10 +18,10 @@ jobs:
         sudo systemctl enable xrdp
         sudo systemctl start xrdp
 
-    - name: Configure XRDP for XFCE
+    - name: Configure XRDP for GNOME
       run: |
-        echo "startxfce4" > ~/.xsession
-        sudo sed -i 's/\/etc\/X11\/Xsession/\/usr\/bin\/startxfce4/g' /etc/xrdp/startwm.sh
+        echo "gnome-session" > ~/.xsession
+        sudo sed -i 's/\/etc\/X11\/Xsession/gnome-session/g' /etc/xrdp/startwm.sh
 
     - name: Set Password for Runner User
       run: echo "runner:P@ssw0rd!" | sudo chpasswd
