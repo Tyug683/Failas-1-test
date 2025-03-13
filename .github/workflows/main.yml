@@ -1,12 +1,16 @@
-name: CI
+name: Playit RDP Tunnel
 
-on: [push, workflow_dispatch]
+on:
+  workflow_dispatch:
 
 jobs:
-  build:
+  setup-rdp-tunnel:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
     - name: Install XFCE4 Desktop
       run: |
         sudo apt update
@@ -24,23 +28,20 @@ jobs:
         sudo sed -i 's/\/etc\/X11\/Xsession/\/usr\/bin\/xfce4-session/g' /etc/xrdp/startwm.sh
 
     - name: Set Password for Runner User
-      run: echo "runner:P@ssw0rd!" | sudo chpasswd
+      run: echo "runner:p@ssw0rd!" | sudo chpasswd
 
-    - name: Ensure Home Directory
+    - name: Download Playit.gg
       run: |
-        sudo mkdir -p /home/runner
-        sudo chown runner:runner /home/runner
+        curl -L https://github.com/playit-cloud/playit-agent/releases/download/v0.15.26/playit-linux-x86_64 -o playit
+        chmod +x playit
 
-    - name: Download Ngrok
-      run: curl -s https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -o ngrok.tgz
-
-    - name: Extract Ngrok
-      run: tar -xzf ngrok.tgz
-
-    - name: Auth Ngrok
-      run: ./ngrok authtoken $NGROK_AUTH_TOKEN
+    - name: Start Playit and Set Up RDP Tunnel
       env:
-        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        PLAYIT_AUTH_KEY: ${{ secrets.PL }}
+      run: |
+        ./playit --secret $PLAYIT_AUTH_KEY &
+        sleep 10  # Give some time for Playit to start
+        ./playit tunnel create --port 3389 --protocol tcp
 
-    - name: Create Tunnel
-      run: ./ngrok tcp 3389
+    - name: Keep the GitHub Action Runner Alive
+      run: sleep 11800  # Adjust the duration based on your needs
